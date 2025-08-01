@@ -1,0 +1,408 @@
+<html>
+<head>
+    <title>The Coherent Multiplex</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        body {
+            background: #181818;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        h2 {
+            text-align: center;
+            margin-top: 32px;
+            font-weight: 400;
+            letter-spacing: 2px;
+        }
+        .canvas {
+            margin: 32px 0 32px 0;
+            width: 100%;
+            min-width: 250px;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px #000a;
+            background: #222;
+            padding: 8px 8px 4px 8px;
+            box-sizing: border-box;
+            display: inline-block;
+            vertical-align: top;
+        }
+        .container {
+            width: 100vw;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="margin-top:12px; margin-bottom:8px;">Coherent Multiplex</h2>
+    <div class="container">
+        <div id="chart1" class="canvas"></div>
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 32px 16px; font-size: 14px; color: #e0e0e0;">
+            <div style="margin-bottom: 8px; font-weight: bold;">Signals</div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div><span style="color: hsl(0, 80%, 60%);">■</span> A</div>
+                <div><span style="color: hsl(24, 80%, 60%);">■</span> B</div>
+                <div><span style="color: hsl(49, 80%, 60%);">■</span> C</div>
+                <div><span style="color: hsl(135, 80%, 60%);">■</span> D</div>
+                <div><span style="color: hsl(180, 80%, 60%);">■</span> E</div>
+                <div><span style="color: hsl(225, 80%, 60%);">■</span> F</div>
+                <div><span style="color: hsl(270, 80%, 60%);">■</span> G</div>
+                <div><span style="color: hsl(315, 80%, 60%);">■</span> H</div>
+            </div>
+        </div>
+        <div id="chart2" class="canvas"></div>
+    </div>
+    <!-- Sigma.js graph and distances panel side by side -->
+    <div style="display: flex; justify-content: center; align-items: flex-start; margin-bottom: 32px;">
+        <div id="sigma-container" style="width:600px; height:600px; border: 2px solid #444; border-radius: 10px; background: #222;"></div>
+        <div id="distances-panel" style="min-width:150px; height:600px; margin-left:18px; background:#222; border-radius:10px; box-shadow:0 2px 12px #000a; padding:8px 8px 8px 8px; color:#e0e0e0; font-size:15px; display:inline-block; vertical-align:top; overflow:hidden;">
+            <div style="font-weight:bold; margin-bottom:4px; font-size:20px;">Edge Distances</div>
+            <div id="distances-list"></div>
+        </div>
+    </div>
+    <script>
+    const N_SIGNALS = 8;
+    const FS = 100; // Sampling frequency - this was missing!
+    const labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    // All 8 signals on chart1, all 8 FFTs on chart2
+    let traces1 = [];
+    let traces2 = [];
+    // Colors to match legend: A-red, B-orange, C-yellow, D-green, E-cyan, F-blue, G-purple, H-magenta
+    const plotColors = [
+        '#ff3333', // A - red
+        '#ff9933', // B - orange
+        '#ffff33', // C - yellow
+        '#33ff33', // D - green
+        '#33ffff', // E - cyan
+        '#3385ff', // F - blue
+        '#9933ff', // G - purple
+        '#ff33c6'  // H - magenta
+    ];
+    for (let i = 0; i < N_SIGNALS; i++) {
+        const subplotIndex = i + 1;
+        traces1.push({
+            y: [],
+            mode: 'lines',
+            name: labels[i],
+            line: {shape: 'spline', color: plotColors[i], width: 1.2},
+            xaxis: 'x' + subplotIndex,
+            yaxis: 'y' + subplotIndex
+        });
+        traces2.push({
+            y: [],
+            mode: 'lines',
+            name: labels[i] + ' FFT',
+            line: {shape: 'spline', color: plotColors[i], width: 1.2},
+            xaxis: 'x' + subplotIndex,
+            yaxis: 'y' + subplotIndex
+        });
+    }
+    const layout1 = {
+        grid: {rows: 8, columns: 1, pattern: 'independent', xgap: 0.01, ygap: 0},
+        height: 600,
+        width: 400,
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        font: {color: '#e0e0e0', family: 'Segoe UI,Roboto,Arial,sans-serif'},
+        margin: {t: 40, l: 30, r: 30, b: 40},
+        showlegend: false,
+    };
+    const layout2 = JSON.parse(JSON.stringify(layout1));
+    layout2.showlegend = false;
+    for (let i = 1; i <= 8; i++) {
+        layout1['yaxis' + (i === 1 ? '' : i)] = {
+            showgrid: false,
+            zeroline: false,
+            showline: false,
+            showticklabels: false,
+            ticks: '',
+            visible: true,
+            bgcolor: 'rgba(0,0,0,0)',
+        };
+        // Only show time axis on bottom subplot
+        if (i === 8) {
+            layout1['xaxis' + i] = {
+                showgrid: false,
+                zeroline: false,
+                showline: true,
+                showticklabels: true,
+                ticks: 'outside',
+                tickfont: {color: '#e0e0e0', size: 12},
+                title: 'Time (Seconds)',
+                titlefont: {color: '#e0e0e0', size: 14},
+                bgcolor: 'rgba(0,0,0,0)',
+            };
+        } else {
+            layout1['xaxis' + (i === 1 ? '' : i)] = {
+                showgrid: false,
+                zeroline: false,
+                showline: false,
+                showticklabels: false,
+                ticks: '',
+                visible: true,
+                bgcolor: 'rgba(0,0,0,0)',
+            };
+        }
+        // FFT panel: frequency axis on bottom subplot
+        layout2['yaxis' + (i === 1 ? '' : i)] = JSON.parse(JSON.stringify(layout1['yaxis' + (i === 1 ? '' : i)]));
+        if (i === 8) {
+            layout2['xaxis' + i] = {
+                showgrid: false,
+                zeroline: false,
+                showline: true,
+                showticklabels: true,
+                ticks: 'outside',
+                tickfont: {color: '#e0e0e0', size: 12},
+                title: 'Frequency (Hz)',
+                titlefont: {color: '#e0e0e0', size: 14},
+                bgcolor: 'rgba(0,0,0,0)',
+            };
+        } else {
+            layout2['xaxis' + (i === 1 ? '' : i)] = {
+                showgrid: false,
+                zeroline: false,
+                showline: false,
+                showticklabels: false,
+                ticks: '',
+                visible: true,
+                bgcolor: 'rgba(0,0,0,0)',
+            };
+        }
+    }
+    Plotly.newPlot('chart1', traces1, layout1);
+    Plotly.newPlot('chart2', traces2, layout2);
+
+    const source = new EventSource('/stream');
+    source.onmessage = function(event) {
+
+        const data = JSON.parse(event.data);
+        // Check shapes
+        if (!data.signals || !data.fft || !Array.isArray(data.signals) || !Array.isArray(data.fft)) {
+            return;
+        }
+        if (!data.signals[0] || !data.fft[0]) {
+            return;
+        }
+        // Normalize distances to [0, 1] before sending to other scripts
+        let rawDistances = Array.isArray(data.distances) ? data.distances : [];
+        let normDistances = [];
+        if (rawDistances.length > 0) {
+            const arr = rawDistances.filter(v => typeof v === 'number');
+            let min = Math.min(...arr);
+            let max = Math.max(...arr);
+            for (let i = 0; i < rawDistances.length; i++) {
+                let val = rawDistances[i];
+                if (typeof val === 'number' && max > min) {
+                    normDistances.push((val - min) / (max - min));
+                } else if (typeof val === 'number') {
+                    normDistances.push(0);
+                } else {
+                    normDistances.push('-');
+                }
+            }
+        }
+        window.edgeDistances = normDistances;
+
+        // Display normalized distances in the panel
+        const distPanel = document.getElementById('distances-list');
+        if (distPanel && Array.isArray(window.edgeDistances)) {
+            // Generate edge labels (A-B, A-C, ..., G-H)
+            const edgeLabels = [];
+            for (let i = 0; i < labels.length; i++) {
+                for (let j = i + 1; j < labels.length; j++) {
+                    edgeLabels.push(`${labels[i]}-${labels[j]}`);
+                }
+            }
+            // Normalize distances to [0, 1]
+            const arr = window.edgeDistances.filter(v => typeof v === 'number');
+            let min = Math.min(...arr);
+            let max = Math.max(...arr);
+            let html = '';
+            for (let k = 0; k < edgeLabels.length; k++) {
+                let val = window.edgeDistances[k];
+                let norm = '-';
+                if (typeof val === 'number' && max > min) {
+                    norm = ((val - min) / (max - min)).toFixed(4);
+                } else if (typeof val === 'number') {
+                    norm = '0.0000';
+                }
+                html += `<div style="margin-bottom:2px; line-height:1.1;"><span style="color:#aaa;">${edgeLabels[k]}</span>: <span style="color:#ffd700;">${norm}</span></div>`;
+            }
+            distPanel.innerHTML = html;
+        }
+
+        const N = data.signals[0].length;
+        const Nfft = data.fft[0].length;
+        const xvals = Array.from({length: N}, (_, k) => k);
+        const freqvals = Array.from({length: Nfft}, (_, k) => k * (FS / (2 * Nfft)));
+        let traces1 = [];
+        let traces2 = [];
+        for (let i = 0; i < N_SIGNALS; i++) {
+            const subplotIndex = i + 1;
+            traces1.push({
+                x: xvals,
+                y: data.signals[i],
+                mode: 'lines',
+                name: labels[i],
+                line: {shape: 'spline', color: plotColors[i], width: 1.2},
+                xaxis: 'x' + subplotIndex,
+                yaxis: 'y' + subplotIndex
+            });
+            // Plot modulus of FFT
+            let fft_y = data.fft[i];
+            if (fft_y && Array.isArray(fft_y)) {
+                fft_y = fft_y.map(v => typeof v === 'object' && v !== null && 're' in v && 'im' in v ? Math.sqrt(v.re*v.re + v.im*v.im) : Math.abs(v));
+            } else {
+                fft_y = [];
+            }
+            traces2.push({
+                x: freqvals,
+                y: fft_y,
+                mode: 'lines',
+                name: labels[i] + ' FFT',
+                line: {shape: 'spline', color: plotColors[i], width: 1.2},
+                xaxis: 'x' + subplotIndex,
+                yaxis: 'y' + subplotIndex
+            });
+        }
+        Plotly.react('chart1', traces1, layout1);
+        Plotly.react('chart2', traces2, layout2);
+        // Use distances from backend to set edge interest
+        if (window.updateEdgeInterest) {
+            // Randomize interests for each edge
+            const edgeIds = [];
+            for (let i = 0; i < labels.length; i++) {
+                for (let j = i + 1; j < labels.length; j++) {
+                    edgeIds.push(`${labels[i]}-${labels[j]}`);
+                }
+            }
+            let edgeInterests = {};
+            for (const edgeId of edgeIds) {
+                var mode = Math.random() < 0.5 ? 0 : 1;
+                var spread = Math.random() * 0.25;
+                edgeInterests[edgeId] = mode === 0 ? spread : 1 - spread;
+            }
+            function getInterest(edgeId) {
+                return edgeInterests[edgeId];
+            }
+            window.updateEdgeInterest(getInterest);
+        }
+    };
+    </script>
+    <script src="/static/graphology.min.js"></script>
+    <script src="/static/sigma.min.js"></script>
+    <script src="/static/graph.js"></script>
+    <script>
+    // Patch graph.js to accept a getInterest function
+    if (window.updateEdgeInterest && typeof window.updateEdgeInterest === 'function') {
+        const origUpdate = window.updateEdgeInterest;
+        window.updateEdgeInterest = function(getInterest) {
+            if (typeof getInterest !== 'function') {
+                // fallback to original random interest
+                origUpdate();
+                return;
+            }
+            // Animation duration in ms
+            const duration = 400;
+            const frameRate = 30;
+            const steps = Math.round(duration / (1000 / frameRate));
+            let startAttrs = {};
+            let endAttrs = {};
+            const nodeLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+            const nodeColors = [
+                '#ff0000', '#ffff00', '#00ff00', '#00ffff',
+                '#0000ff', '#ff00ff', '#ffa500', '#800080'
+            ];
+            const N = nodeLabels.length;
+            function hexToRgb(hex) {
+                hex = hex.replace('#', '');
+                if (hex.length === 3) {
+                    hex = hex.split('').map(function (h) { return h + h; }).join('');
+                }
+                var bigint = parseInt(hex, 16);
+                var r = (bigint >> 16) & 255;
+                var g = (bigint >> 8) & 255;
+                var b = bigint & 255;
+                return [r, g, b];
+            }
+            function rgbToHex(r, g, b) {
+                return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+            }
+            function interpolateColor(color1, color2) {
+                var rgb1 = hexToRgb(color1);
+                var rgb2 = hexToRgb(color2);
+                var r = Math.round((rgb1[0] + rgb2[0]) / 2);
+                var g = Math.round((rgb1[1] + rgb2[1]) / 2);
+                var b = Math.round((rgb1[2] + rgb2[2]) / 2);
+                return [r, g, b];
+            }
+            function adjustBrightness(rgb, interest) {
+                return rgb.map(function(c) {
+                    return Math.round(c * interest + 255 * (1 - interest));
+                });
+            }
+            for (let i = 0; i < N; i++) {
+                for (let j = i + 1; j < N; j++) {
+                    var edgeId = nodeLabels[i] + '-' + nodeLabels[j];
+                    // Start values
+                    let prevInterest = window.interested && window.interested[edgeId] ? window.interested[edgeId] : 0;
+                    let prevRgbMid = interpolateColor(nodeColors[i], nodeColors[j]);
+                    let prevRgbBright = adjustBrightness(prevRgbMid, prevInterest);
+                    let prevColor = rgbToHex(prevRgbBright[0], prevRgbBright[1], prevRgbBright[2]);
+                    let prevWidth = 2 + prevInterest * 8;
+                    startAttrs[edgeId] = {interest: prevInterest, color: prevColor, width: prevWidth};
+                    // End values
+                    var interest = getInterest(edgeId);
+                    var rgbMid = interpolateColor(nodeColors[i], nodeColors[j]);
+                    var rgbBright = adjustBrightness(rgbMid, interest);
+                    var edgeColor = rgbToHex(rgbBright[0], rgbBright[1], rgbBright[2]);
+                    var edgeWidth = 2 + interest * 8;
+                    endAttrs[edgeId] = {interest, color: edgeColor, width: edgeWidth};
+                    window.interested[edgeId] = interest;
+                }
+            }
+            // Animate
+            let frame = 0;
+            function animate() {
+                frame++;
+                let t = Math.min(frame / steps, 1);
+                for (let i = 0; i < N; i++) {
+                    for (let j = i + 1; j < N; j++) {
+                        var edgeId = nodeLabels[i] + '-' + nodeLabels[j];
+                        var s = startAttrs[edgeId];
+                        var e = endAttrs[edgeId];
+                        // Interpolate interest
+                        var interest = s.interest + (e.interest - s.interest) * t;
+                        // Interpolate color
+                        var sRgb = hexToRgb(s.color);
+                        var eRgb = hexToRgb(e.color);
+                        var rgb = [
+                            Math.round(sRgb[0] + (eRgb[0] - sRgb[0]) * t),
+                            Math.round(sRgb[1] + (eRgb[1] - sRgb[1]) * t),
+                            Math.round(sRgb[2] + (eRgb[2] - sRgb[2]) * t)
+                        ];
+                        var color = rgbToHex(rgb[0], rgb[1], rgb[2]);
+                        // Interpolate width
+                        var width = s.width + (e.width - s.width) * t;
+                        if (window.graph && window.graph.hasEdge(nodeLabels[i], nodeLabels[j])) {
+                            window.graph.setEdgeAttribute(nodeLabels[i], nodeLabels[j], 'color', color);
+                            window.graph.setEdgeAttribute(nodeLabels[i], nodeLabels[j], 'size', width);
+                            window.graph.setEdgeAttribute(nodeLabels[i], nodeLabels[j], 'interest', interest);
+                        }
+                    }
+                }
+                if (frame < steps) {
+                    setTimeout(animate, 1000 / frameRate);
+                }
+            }
+            animate();
+        };
+    }
+    </script>
+</body>
+</html>

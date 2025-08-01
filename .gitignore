@@ -1,0 +1,16 @@
+# Python virtual environment
+venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# chtmpx directory
+chtmpx/
+
+# VS Code settings
+.vscode/
+
+# Other common ignores
+*.log
+*.env
