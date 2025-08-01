@@ -41,28 +41,47 @@
 <body>
     <h2 style="margin-top:12px; margin-bottom:8px;">Coherent Multiplex</h2>
     <div class="container">
-        <div id="chart1" class="canvas"></div>
+        <div class="canvas" style="position:relative;">
+            <div style="width:100%; text-align:center; margin-bottom:2px; position:absolute; top:8px; left:0;">
+                <span style="font-size:1.25em; font-weight:600; color:#e0e0e0; letter-spacing:1px;">Time Domain</span>
+            </div>
+            <div id="chart1" style="margin-top:32px;"></div>
+        </div>
         <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 32px 16px; font-size: 14px; color: #e0e0e0;">
-            <div style="margin-bottom: 8px; font-weight: bold;">Signals</div>
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-                <div><span style="color: hsl(0, 80%, 60%);">■</span> A</div>
-                <div><span style="color: hsl(24, 80%, 60%);">■</span> B</div>
-                <div><span style="color: hsl(49, 80%, 60%);">■</span> C</div>
-                <div><span style="color: hsl(135, 80%, 60%);">■</span> D</div>
-                <div><span style="color: hsl(180, 80%, 60%);">■</span> E</div>
-                <div><span style="color: hsl(225, 80%, 60%);">■</span> F</div>
-                <div><span style="color: hsl(270, 80%, 60%);">■</span> G</div>
-                <div><span style="color: hsl(315, 80%, 60%);">■</span> H</div>
+            <div style="margin-bottom: 8px; font-weight: bold; margin-top: 55px;">Signals</div>
+            <div style="display: flex; flex-direction: column; gap: 9px;">
+                <!-- Increased icon and letter size for better visibility -->
+                <div style="margin-bottom: 10px; font-size: 1.45em; font-weight: 500;"><span style="color: hsl(0, 80%, 60%); font-size: 1.7em; vertical-align: middle;">■</span> <span style="vertical-align: middle;">A</span></div>
+                <div style="margin-bottom: 10px; font-size: 1.45em; font-weight: 500;"><span style="color: hsl(24, 80%, 60%); font-size: 1.7em; vertical-align: middle;">■</span> <span style="vertical-align: middle;">B</span></div>
+                <div style="margin-bottom: 10px; font-size: 1.45em; font-weight: 500;"><span style="color: hsl(49, 80%, 60%); font-size: 1.7em; vertical-align: middle;">■</span> <span style="vertical-align: middle;">C</span></div>
+                <div style="margin-bottom: 10px; font-size: 1.45em; font-weight: 500;"><span style="color: hsl(135, 80%, 60%); font-size: 1.7em; vertical-align: middle;">■</span> <span style="vertical-align: middle;">D</span></div>
+                <div style="margin-bottom: 10px; font-size: 1.45em; font-weight: 500;"><span style="color: hsl(180, 80%, 60%); font-size: 1.7em; vertical-align: middle;">■</span> <span style="vertical-align: middle;">E</span></div>
+                <div style="margin-bottom: 10px; font-size: 1.45em; font-weight: 500;"><span style="color: hsl(225, 80%, 60%); font-size: 1.7em; vertical-align: middle;">■</span> <span style="vertical-align: middle;">F</span></div>
+                <div style="margin-bottom: 10px; font-size: 1.45em; font-weight: 500;"><span style="color: hsl(270, 80%, 60%); font-size: 1.7em; vertical-align: middle;">■</span> <span style="vertical-align: middle;">G</span></div>
+                <div style="font-size: 1.45em; font-weight: 500;"><span style="color: hsl(315, 80%, 60%); font-size: 1.7em; vertical-align: middle;">■</span> <span style="vertical-align: middle;">H</span></div>
             </div>
         </div>
-        <div id="chart2" class="canvas"></div>
+        <div class="canvas" style="position:relative;">
+            <div style="width:100%; text-align:center; margin-bottom:2px; position:absolute; top:8px; left:0;">
+                <span style="font-size:1.25em; font-weight:600; color:#e0e0e0; letter-spacing:1px;">Frequency Domain</span>
+            </div>
+            <div id="chart2" style="margin-top:32px;"></div>
+        </div>
     </div>
     <!-- Sigma.js graph and distances panel side by side -->
     <div style="display: flex; justify-content: center; align-items: flex-start; margin-bottom: 32px;">
         <div id="sigma-container" style="width:600px; height:600px; border: 2px solid #444; border-radius: 10px; background: #222;"></div>
-        <div id="distances-panel" style="min-width:150px; height:600px; margin-left:18px; background:#222; border-radius:10px; box-shadow:0 2px 12px #000a; padding:8px 8px 8px 8px; color:#e0e0e0; font-size:15px; display:inline-block; vertical-align:top; overflow:hidden;">
-            <div style="font-weight:bold; margin-bottom:4px; font-size:20px;">Edge Distances</div>
+        <div id="distances-panel" style="min-width:150px; height:590px; margin-left:18px; background:#222; border-radius:10px; box-shadow:0 2px 12px #000a; padding:8px 8px 8px 8px; color:#e0e0e0; font-size:15px; display:inline-block; vertical-align:top; overflow:hidden;">
+            <div style="font-weight:bold; margin-bottom:4px; font-size:20px;">Cosine Similarities</div>
             <div id="distances-list"></div>
+        </div>
+    </div>
+    
+    <!-- Wavelet Coherence Panel -->
+    <div style="display: flex; justify-content: center; align-items: flex-start; margin-bottom: 32px;">
+        <div id="coherence-panel" style="width:800px; height:400px; background:#222; border-radius:10px; box-shadow:0 2px 12px #000a; padding:12px; color:#e0e0e0;">
+            <div id="coherence-title" style="font-weight:bold; margin-bottom:8px; font-size:20px; text-align:center;">Wavelet Coherence</div>
+            <div id="coherence-plot" style="width:100%; height:350px;"></div>
         </div>
     </div>
     <script>
@@ -133,7 +152,7 @@
                 showticklabels: true,
                 ticks: 'outside',
                 tickfont: {color: '#e0e0e0', size: 12},
-                title: 'Time (Seconds)',
+                title: 'Time (centiseconds)',
                 titlefont: {color: '#e0e0e0', size: 14},
                 bgcolor: 'rgba(0,0,0,0)',
             };
@@ -218,22 +237,43 @@
                     edgeLabels.push(`${labels[i]}-${labels[j]}`);
                 }
             }
-            // Normalize distances to [0, 1]
-            const arr = window.edgeDistances.filter(v => typeof v === 'number');
-            let min = Math.min(...arr);
-            let max = Math.max(...arr);
-            let html = '';
-            for (let k = 0; k < edgeLabels.length; k++) {
-                let val = window.edgeDistances[k];
-                let norm = '-';
-                if (typeof val === 'number' && max > min) {
-                    norm = ((val - min) / (max - min)).toFixed(4);
-                } else if (typeof val === 'number') {
-                    norm = '0.0000';
-                }
-                html += `<div style="margin-bottom:2px; line-height:1.1;"><span style="color:#aaa;">${edgeLabels[k]}</span>: <span style="color:#ffd700;">${norm}</span></div>`;
+            // Prepare data for hbar plot (1 - distances)
+            const arr = window.edgeDistances.map(v => (typeof v === 'number' ? 1 - v : 0));
+            // Remove previous plot if exists
+            if (window.edgeBarPlot) {
+                Plotly.purge('distances-list');
             }
-            distPanel.innerHTML = html;
+            // Calculate compact height: 18px per item + some margin
+            const itemHeight = 18;
+            const plotHeight = edgeLabels.length * itemHeight + 40;
+            Plotly.newPlot('distances-list', [{
+                type: 'bar',
+                x: arr,
+                y: edgeLabels,
+                orientation: 'h',
+                marker: {
+                    color: 'rgba(0, 200, 255, 0.3)', // Modern blue-cyan
+                    line: {width: 0},
+                },
+                // No text on bars
+            }], {
+                margin: {l: 20, r: 10, t: 10, b: 10},
+                paper_bgcolor: '#222',
+                plot_bgcolor: '#222',
+                font: {color: '#e0e0e0', family: 'Segoe UI,Roboto,Arial,sans-serif'},
+                xaxis: {
+                    showticklabels: false,
+                    showgrid: false,
+                    zeroline: false,
+                    title: '',
+                    range: [0, 1]
+                },
+                yaxis: {automargin: true},
+                bargap: 0.35, // more gap for rounded effect
+                height: plotHeight,
+                width: document.getElementById('distances-panel').offsetWidth - 16
+            }, {displayModeBar: false});
+            window.edgeBarPlot = true;
         }
 
         const N = data.signals[0].length;
@@ -272,6 +312,163 @@
         }
         Plotly.react('chart1', traces1, layout1);
         Plotly.react('chart2', traces2, layout2);
+        
+        // Handle wavelet coherence data
+        if (data.wavelet_coherence) {
+            const cohData = data.wavelet_coherence;
+            const cohTitle = document.getElementById('coherence-title');
+            if (cohTitle) {
+                // Find color indices for the pair
+                const idxA = labels.indexOf(cohData.pair_labels[0]);
+                const idxB = labels.indexOf(cohData.pair_labels[1]);
+                const colorA = plotColors[idxA] || '#fff';
+                const colorB = plotColors[idxB] || '#fff';
+                cohTitle.innerHTML = `Wavelet Coherence: <span style='color:${colorA}; font-weight:bold;'>&#9632;</span> ${cohData.pair_labels[0]} - <span style='color:${colorB}; font-weight:bold;'>&#9632;</span> ${cohData.pair_labels[1]}`;
+            }
+            
+            // Plot wavelet coherence as heatmap
+            if (cohData.coherence && cohData.freqs) {
+                const coherenceMatrix = cohData.coherence;
+                const freqs = cohData.freqs;
+                const phases = cohData.phases || null;
+                
+                // Create time axis (assuming coherence matrix has time as second dimension)
+                const timeSteps = coherenceMatrix[0] ? coherenceMatrix[0].length : 100;
+                const timeAxis = Array.from({length: timeSteps}, (_, i) => (i / FS) * 100);
+                
+                // Prepare traces - start with heatmap
+                const traces = [{
+                    z: coherenceMatrix,
+                    x: timeAxis,
+                    y: freqs, // Use actual frequency values (log-scaled)
+                    type: 'heatmap',
+                    colorscale: 'Jet', // Changed from Viridis to Turbo
+                    hoverongaps: false,
+                    colorbar: {
+                        title: 'Coherence',
+                        titlefont: {color: '#e0e0e0'},
+                        tickfont: {color: '#e0e0e0'},
+                        bgcolor: '#222',
+                        bordercolor: '#444',
+                        borderwidth: 1
+                    },
+                    showscale: true
+                }];
+                
+                // Add phase arrows if phase data is available
+                if (phases && phases.length > 0) {
+                    // Different step sizes for frequency and time (higher vertical density, lower horizontal density)
+                    const freqStep = 8;  // Increased vertical density (was 8)
+                    const timeStep = 11; // Decreased horizontal density (was 8)
+                    const arrowX = [];
+                    const arrowY = [];
+                    const arrowAngles = [];  // Store actual angles in degrees
+                    
+                    for (let i = 0; i < freqs.length; i += freqStep) {
+                        for (let j = 0; j < timeSteps; j += timeStep) {
+                            if (phases[i] && phases[i][j] !== undefined) {
+                                const phase = phases[i][j];
+                                const coherence = coherenceMatrix[i][j];
+                                
+                                // Only show arrows where coherence is significant (> 0.5)
+                                if (coherence > 0.5) {
+                                    arrowX.push(timeAxis[j]);
+                                    arrowY.push(freqs[i]);
+                                    
+                                    // Convert phase from radians to degrees and normalize to 0-360
+                                    let angleDeg = (phase * 180 / Math.PI) % 360;
+                                    if (angleDeg < 0) angleDeg += 360;
+                                    arrowAngles.push(angleDeg);
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Add scatter plot with arrow symbols and proper angles
+                    if (arrowX.length > 0) {
+                        traces.push({
+                            x: arrowX,
+                            y: arrowY,
+                            mode: 'markers',
+                            marker: {
+                                symbol: 'arrow',
+                                size: 14, // Increased arrow size
+                                color: 'white',
+                                line: {color: 'black', width: 2},
+                                angle: arrowAngles, // Use actual phase angles
+                                angleref: 'previous' // Angle relative to previous marker
+                            },
+                            text: arrowAngles.map(angle => `Phase: ${angle.toFixed(1)}°`),
+                            hovertemplate: '%{text}<extra></extra>',
+                            showlegend: false,
+                            name: 'Phase'
+                        });
+                    }
+                }
+                
+                Plotly.newPlot('coherence-plot', traces, {
+                    margin: {l: 60, r: 80, t: 20, b: 60},
+                    paper_bgcolor: '#222',
+                    plot_bgcolor: '#222',
+                    font: {color: '#e0e0e0', family: 'Segoe UI,Roboto,Arial,sans-serif'},
+                    xaxis: {
+                        title: 'Time (centiseconds)',
+                        titlefont: {color: '#e0e0e0'},
+                        tickfont: {color: '#e0e0e0'},
+                        gridcolor: '#444',
+                        zerolinecolor: '#666',
+                        range: [timeAxis[0], timeAxis[timeAxis.length - 1]], // Fix x-axis range
+                        tickformat: '.2f',
+                        tick0: 0,
+                        dtick: (timeAxis[timeAxis.length - 1] - timeAxis[0]) / 5 // Show about 5 ticks
+                    },
+                    yaxis: {
+                        title: 'Frequency (Hz)',
+                        titlefont: {color: '#e0e0e0'},
+                        tickfont: {color: '#e0e0e0'},
+                        gridcolor: '#444',
+                        zerolinecolor: '#666',
+                        type: 'log', // Use logarithmic scale to match frequency spacing
+                        range: [Math.log10(freqs[0]), Math.log10(freqs[freqs.length - 1])], // Fix y-axis range for log scale
+                        tickvals: [1, 2, 5, 10, 20, 50], // Explicit tick positions
+                        ticktext: ['1', '2', '5', '10', '20', '50'] // Explicit tick labels
+                    },
+                    height: 350,
+                    width: 776
+                }, {displayModeBar: false});
+                Plotly.react('coherence-plot', traces, {
+                    margin: {l: 60, r: 80, t: 20, b: 60},
+                    paper_bgcolor: '#222',
+                    plot_bgcolor: '#222',
+                    font: {color: '#e0e0e0', family: 'Segoe UI,Roboto,Arial,sans-serif'},
+                    xaxis: {
+                        title: 'Time (centiseconds)',
+                        titlefont: {color: '#e0e0e0'},
+                        tickfont: {color: '#e0e0e0'},
+                        gridcolor: '#444',
+                        zerolinecolor: '#666',
+                        range: [timeAxis[0], timeAxis[timeAxis.length - 1]], // Fix x-axis range
+                        tickformat: '.2f',
+                        tick0: 0,
+                        dtick: (timeAxis[timeAxis.length - 1] - timeAxis[0]) / 5 // Show about 5 ticks
+                    },
+                    yaxis: {
+                        title: 'Frequency (Hz)',
+                        titlefont: {color: '#e0e0e0'},
+                        tickfont: {color: '#e0e0e0'},
+                        gridcolor: '#444',
+                        zerolinecolor: '#666',
+                        type: 'log', // Use logarithmic scale to match frequency spacing
+                        range: [Math.log10(freqs[0]), Math.log10(freqs[freqs.length - 1])], // Fix y-axis range for log scale
+                        tickvals: [1, 2, 5, 10, 20, 50], // Explicit tick positions
+                        ticktext: ['1', '2', '5', '10', '20', '50'] // Explicit tick labels
+                    },
+                    height: 350,
+                    width: 776
+                }, {displayModeBar: false, transition: {duration: 600, easing: 'cubic-in-out'}});
+            }
+        }
+        
         // Use distances from backend to set edge interest
         if (window.updateEdgeInterest) {
             // Randomize interests for each edge

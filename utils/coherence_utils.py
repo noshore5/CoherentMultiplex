@@ -4,7 +4,7 @@ import fcwt  # Ensure you have the fcwt package installed
 import numpy as np
 import os
 
-def coherence1(coeffs1, coeffs2, freqs):
+def psuedocoherence(coeffs1, coeffs2, freqs):
     S1 = np.abs(coeffs1) ** 2
     S2 = np.abs(coeffs2) ** 2
     S12 = coeffs1 * np.conj(coeffs2)
@@ -32,8 +32,7 @@ def coherence(coeffs1, coeffs2, freqs):
 
 
 def transform(signal1, frame_rate, highest, lowest, nfreqs=100):
-    """Transform signal using continuous wavelet transform.
-    Parameters are scaled based on frame_rate."""
+
     signal1 = np.asarray(signal1, dtype=np.float64)
 
     freqs, coeffs1 = fcwt.cwt(signal1, frame_rate, lowest, highest, nfreqs, 
