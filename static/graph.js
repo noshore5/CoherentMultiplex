@@ -50,14 +50,14 @@ function getEdgeColor(idx, t) {
     function accentColormap(t) {
         // 8 colors from matplotlib Accent
         const accentColors = [
-            '#e9d1a8ff', // 
-            '#b1873fff', // 
-            '#777637ff', // 
-            '#8aac54ff', // 
-            '#378383ff', // 
-            '#2e5b80ff', // 
-            '#722f83ff', // 
-            '#3b1f31ff'  // 
+            '#ffffffff', // 
+            '#999999ff', // 
+            '#777777ff', // 
+            '#6b6b6bff', // 
+            '#555555ff', // 
+            '#4e4e4eff', // 
+            '#424242ff', // 
+            '#2b2b2bff'  // 
         ];
         // Map t in [0,1] to one of 8 colors
         const idx = Math.floor((1 - t) * accentColors.length);
