@@ -7,34 +7,41 @@ WORKDIR /app
 # Copy requirements first and install early (good for Docker cache)
 COPY requirements.txt .
 
-# Install dependencies
- RUN apt-get update && apt-get install -y \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
     g++ \
     build-essential \
     gcc \
     libffi-dev \
     libssl-dev \
     libatlas-base-dev \
-#   libpng-dev \
     libfftw3-dev \
-#   libfftw3-single3 \
+    pkg-config \
+    curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-
-# Copy the rest of the app
+# Copy the application code (config.py will be excluded by .dockerignore)
 COPY . .
 
-# Expose the port uvicorn will run on
-EXPOSE 8000
+# Remove any config files that might have been copied
+RUN rm -f config.py config_safe.py
 
-# Start FastAPI with gunicorn and multiple uvicorn workers for better performance
-CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "main:app", "--bind", "0.0.0.0:8000", "--workers", "2"]
+# Create a runtime config that uses environment variables only
+RUN echo "import os" > config.py && \
+    echo "CLAUDE_API_KEY = os.getenv('CLAUDE_API_KEY', '')" >> config.py && \
+    echo "DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'" >> config.py
 
-# Build the Docker image
-# docker build -t coherixlive .
+# Expose the port
+EXPOSE 8080
 
-# Run the Docker container, mapping port 8000
-# docker run -p 8000:8000 coherixlive
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/ || exit 1
+
+# Start the application
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"]
 

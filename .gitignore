@@ -11,6 +11,11 @@ chtmpx/
 # VS Code settings
 .vscode/
 
+# Configuration files with sensitive data
+config.py
+config_local.py
+config_safe.py
+
 # Other common ignores
 *.log
 *.env
